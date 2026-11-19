@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Credit card base -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M24,36 L84,36 A6,6 0 0,1 90,42 L90,68 A6,6 0 0,1 84,74 L24,74 A6,6 0 0,1 18,68 L18,42 A6,6 0 0,1 24,36 Z" />
+    <!-- Magnetic stripe -->
+    <path
+        android:fillColor="#064E3B"
+        android:pathData="M18,45 L90,45 L90,52 L18,52 Z" />
+    <!-- Gold chip -->
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M26,57 L38,57 A2,2 0 0,1 40,59 L40,66 A2,2 0 0,1 38,68 L26,68 A2,2 0 0,1 24,66 L24,59 A2,2 0 0,1 26,57 Z" />
+    <!-- Text lines -->
+    <path
+        android:fillColor="#ECFDF5"
+        android:pathData="M48,61 L82,61 L82,64 L48,64 Z" />
+    <path
+        android:fillColor="#A7F3D0"
+        android:pathData="M62,67 L82,67 L82,70 L62,70 Z" />
+</vector>
