@@ -40,6 +40,7 @@ import com.cccuan.app.data.CreditCard
 import com.cccuan.app.data.RecordType
 import com.cccuan.app.ui.theme.BrandEmerald
 import com.cccuan.app.ui.theme.BrandNavy
+import com.cccuan.app.util.Formatters
 import com.cccuan.app.util.PdfExporter
 import kotlinx.coroutines.launch
 
@@ -56,7 +57,6 @@ fun MainScreen(
 
     var selectedTab by remember { mutableIntStateOf(0) }
 
-    // Dialog states
     var showCardDialog by remember { mutableStateOf(false) }
     var editingCard by remember { mutableStateOf<CreditCard?>(null) }
     var deletingCard by remember { mutableStateOf<CreditCard?>(null) }
@@ -83,7 +83,6 @@ fun MainScreen(
                 "PDF siap dibuka: ${result.fileName}"
             }
 
-            // Launch share/open chooser
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "application/pdf"
                 putExtra(Intent.EXTRA_STREAM, result.shareUri)
@@ -98,12 +97,16 @@ fun MainScreen(
                     duration = SnackbarDuration.Long
                 )
                 if (action == SnackbarResult.ActionPerformed) {
-                    context.startActivity(Intent.createChooser(shareIntent, "Buka atau Bagikan Laporan PDF"))
+                    context.startActivity(
+                        Intent.createChooser(shareIntent, "Buka atau Bagikan Laporan PDF")
+                    )
                 }
             }
         } catch (e: Exception) {
             scope.launch {
-                snackbarHostState.showSnackbar("Gagal ekspor PDF: ${e.message ?: "Error tidak diketahui"}")
+                snackbarHostState.showSnackbar(
+                    "Gagal ekspor PDF: ${e.message ?: "Error tidak diketahui"}"
+                )
             }
         }
     }
@@ -146,6 +149,7 @@ fun MainScreen(
                 ) {
                     Icon(Icons.Filled.Add, contentDescription = "Tambah Kartu")
                 }
+
                 1 -> if (state.cards.isNotEmpty()) {
                     FloatingActionButton(
                         onClick = {
@@ -210,6 +214,7 @@ fun MainScreen(
                         showRecordDialogType = RecordType.PAYMENT
                     }
                 )
+
                 1 -> RecordsTab(
                     state = state,
                     onSelectCardFilter = { viewModel.setCardFilter(it) },
@@ -234,6 +239,7 @@ fun MainScreen(
                     },
                     onExportPdf = { handleExportPdf() }
                 )
+
                 2 -> RemindersTab(
                     state = state,
                     onToggleReminder = { card, enabled ->
@@ -247,7 +253,9 @@ fun MainScreen(
                         onRequestNotificationPermission()
                         viewModel.triggerTestAlarm(cardId)
                         scope.launch {
-                            snackbarHostState.showSnackbar("Alarm uji coba dikirim! Cek notifikasi HP kamu.")
+                            snackbarHostState.showSnackbar(
+                                "Alarm uji coba dikirim! Cek notifikasi HP kamu."
+                            )
                         }
                     },
                     onExportPdf = { handleExportPdf() },
@@ -257,7 +265,6 @@ fun MainScreen(
         }
     }
 
-    // Add / Edit Card Dialog
     if (showCardDialog) {
         CardFormDialog(
             initialCard = editingCard,
@@ -266,13 +273,14 @@ fun MainScreen(
                 viewModel.saveCard(card)
                 showCardDialog = false
                 scope.launch {
-                    snackbarHostState.showSnackbar("Kartu ${card.name} disimpan & alarm H-7 dijadwalkan.")
+                    snackbarHostState.showSnackbar(
+                        "Kartu ${card.name} disimpan & alarm H-7 dijadwalkan."
+                    )
                 }
             }
         )
     }
 
-    // Add / Edit Record Dialog
     val activeRecordType = showRecordDialogType
     if (activeRecordType != null && state.summaries.isNotEmpty()) {
         RecordFormDialog(
@@ -289,37 +297,41 @@ fun MainScreen(
                 showRecordDialogType = null
                 editingRecord = null
                 scope.launch {
-                    val label = if (record.type == RecordType.PAYMENT) "Pembayaran" else "Transaksi"
+                    val label = if (record.type == RecordType.PAYMENT) {
+                        "Pembayaran"
+                    } else {
+                        "Transaksi"
+                    }
                     snackbarHostState.showSnackbar("$label berhasil dicatat.")
                 }
             }
         )
     }
 
-    // Confirm Delete Card
-    deletingCard?.let { card ->
+    val cardToDelete = deletingCard
+    if (cardToDelete != null) {
         ConfirmDeleteDialog(
             title = "Hapus Kartu Kredit?",
-            message = "Kartu "${card.name}" beserta seluruh riwayat transaksi dan pembayarannya akan dihapus permanen.",
+            message = "Kartu \"${cardToDelete.name}\" beserta seluruh riwayat transaksi dan pembayarannya akan dihapus permanen.",
             onDismiss = { deletingCard = null },
             onConfirm = {
-                viewModel.deleteCard(card.id)
+                viewModel.deleteCard(cardToDelete.id)
                 deletingCard = null
                 scope.launch {
-                    snackbarHostState.showSnackbar("Kartu ${card.name} dihapus.")
+                    snackbarHostState.showSnackbar("Kartu ${cardToDelete.name} dihapus.")
                 }
             }
         )
     }
 
-    // Confirm Delete Record
-    deletingRecord?.let { rec ->
+    val recordToDelete = deletingRecord
+    if (recordToDelete != null) {
         ConfirmDeleteDialog(
             title = "Hapus Riwayat?",
-            message = "Hapus catatan "${rec.title}" sebesar ${com.cccuan.app.util.Formatters.formatRupiah(rec.amount)}?",
+            message = "Hapus catatan \"${recordToDelete.title}\" sebesar ${Formatters.formatRupiah(recordToDelete.amount)}?",
             onDismiss = { deletingRecord = null },
             onConfirm = {
-                viewModel.deleteRecord(rec.id)
+                viewModel.deleteRecord(recordToDelete.id)
                 deletingRecord = null
                 scope.launch {
                     snackbarHostState.showSnackbar("Catatan dihapus.")
